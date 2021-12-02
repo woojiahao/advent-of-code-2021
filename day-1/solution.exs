@@ -12,9 +12,7 @@ defmodule DayOneSolution do
   end
 
   defp solve(data) do
-    min = data |> Enum.min()
-
-    [min + 1 | data]
+    data
     |> Enum.chunk_every(2, 1, :discard)
     |> Enum.count(fn [a, b] -> b > a end)
   end
