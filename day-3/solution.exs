@@ -8,7 +8,6 @@ defmodule DayThreeSolution do
   defp common(data, i, sorter \\ fn a, b -> a >= b end) do
     data
     |> Enum.frequencies_by(fn x -> Enum.at(x, i) end)
-    |> IO.inspect()
     |> Enum.max_by(fn {_, v} -> v end, sorter)
     |> elem(0)
   end
@@ -33,6 +32,8 @@ defmodule DayThreeSolution do
     gamma * epsilon
   end
 
+  defp oxygen(data), do: oxygen(data, 0)
+
   defp oxygen([last], _), do: last |> to_integer()
 
   defp oxygen(data, i) do
@@ -41,18 +42,20 @@ defmodule DayThreeSolution do
     oxygen(filtered, i + 1)
   end
 
+  defp carbon_dioxide(data), do: carbon_dioxide(data, 0)
+
   defp carbon_dioxide([last], _), do: last |> to_integer()
 
   defp carbon_dioxide(data, i) do
-    lowest = data |> common(i, fn a, b -> b >= a end) |> IO.inspect()
-    filtered = data |> Enum.filter(fn x -> Enum.at(x, i) == lowest end) |> IO.inspect()
+    lowest = data |> common(i, fn a, b -> b >= a end)
+    filtered = data |> Enum.filter(fn x -> Enum.at(x, i) == lowest end)
     carbon_dioxide(filtered, i + 1)
   end
 
   defp solve_two(data) do
     o = oxygen(data, 0)
     co = carbon_dioxide(data, 0)
-    o * co
+    oxygen(data) * carbon_dioxide(data)
   end
 
   def part_one(), do: load_data() |> solve()
