@@ -1,6 +1,6 @@
 defmodule AdventOfCode.DayFourSolution do
   defp load_data() do
-    [draw | rest] = File.read!("data.txt") |> String.split("\n", trim: true)
+    [draw | rest] = AdventOfCode.load_data(4, "data.txt")
 
     boards =
       rest
