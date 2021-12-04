@@ -119,26 +119,37 @@ defmodule DayFourSolution do
     get_unmarked(board, row, col + 1, unmarked + x)
   end
 
-  defp solve({[draw], [board | boards]}) do
-    "No bingos"
-  end
-
-  defp solve({[draw | rest], boards}) do
+  defp solve_one({[draw | rest], boards}) do
     # Take the next set of draws and update the board accordingly
     updated_boards = boards |> Enum.map(&fill_draw(draw, &1))
 
     # Check if any of the boards have bingo
-    any_bingos? =
-      updated_boards |> Enum.map(&has_bingo?/1) |> IO.inspect() |> Enum.find_index(&(&1 == true))
+    any_bingos? = updated_boards |> Enum.map(&has_bingo?/1) |> Enum.find_index(&(&1 == true))
 
     unless any_bingos? == nil do
-      bingo_board = updated_boards |> Enum.at(any_bingos?) |> IO.inspect()
+      bingo_board = updated_boards |> Enum.at(any_bingos?)
       unmarked = bingo_board |> get_unmarked()
       unmarked * draw
     else
-      solve({rest, updated_boards})
+      solve_one({rest, updated_boards})
     end
   end
 
-  def part_one(), do: load_data() |> solve()
+  def part_one(), do: load_data() |> solve_one()
+
+  defp solve_two({[draw | rest], unsolved_boards}) do
+    updated_boards = unsolved_boards |> Enum.map(&fill_draw(draw, &1))
+
+    updated_unsolved_boards = updated_boards |> Enum.filter(&(!has_bingo?(&1)))
+
+    if updated_unsolved_boards |> Enum.empty?() do
+      last_board = updated_boards |> Enum.at(0)
+      unmarked = last_board |> get_unmarked()
+      unmarked * draw
+    else
+      solve_two({rest, updated_unsolved_boards})
+    end
+  end
+
+  def part_two(), do: load_data() |> solve_two()
 end
