@@ -5,4 +5,11 @@ defmodule AdventOfCode do
     file_path = Path.join([lib_path, "advent_of_code", "day-#{day}", filename])
     File.read!(file_path) |> String.split("\n", trim: true)
   end
+
+  def time(function) do
+    {_, _, start} = :os.timestamp()
+    function.() |> IO.inspect()
+    {_, _, stop} = :os.timestamp()
+    "Time taken: #{(stop - start) / 1000}ms" |> IO.puts()
+  end
 end

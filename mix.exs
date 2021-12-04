@@ -11,6 +11,9 @@ defmodule AdventOfCode.MixProject do
   end
 
   def deps do
-    []
+    [
+      {:matrex, "~> 0.6"},
+      {:benchee, "~> 1.0"}
+    ]
   end
 end
