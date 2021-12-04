@@ -1,4 +1,4 @@
-defmodule DayFourSolution do
+defmodule AdventOfCode.DayFourSolution do
   defp load_data() do
     [draw | rest] = File.read!("data.txt") |> String.split("\n", trim: true)
 

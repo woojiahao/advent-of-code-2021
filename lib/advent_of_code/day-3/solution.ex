@@ -1,4 +1,4 @@
-defmodule DayThreeSolution do
+defmodule AdventOfCode.DayThreeSolution do
   defp load_data() do
     File.read!("data.txt")
     |> String.split("\n", trim: true)

@@ -1,4 +1,4 @@
-defmodule DayTwoSolution do
+defmodule AdventOfCode.DayTwoSolution do
   defp get_data() do
     File.read!("data.txt")
     |> String.split("\n", trim: true)
