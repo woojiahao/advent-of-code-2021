@@ -7,11 +7,14 @@ defmodule AdventOfCode.DayFiveSolution do
     |> Enum.map(&Enum.chunk_every(&1, 2))
   end
 
-  defp gen_coords(x_from, y_from, x_to, y_to) when x_from == x_to or y_from == y_to do
-    for x <- x_from..x_to,
-        y <- y_from..y_to do
-      {x, y}
-    end
+  defp gen_coords(x_from, y_from, x_to, y_to) when x_from == x_to do
+    0..abs(y_from - y_to)
+    |> Enum.map(fn n -> {x_from, y_from + n} end)
+  end
+
+  defp gen_coords(x_from, y_from, x_to, y_to) when y_from == y_to do
+    0..abs(x_from - x_to)
+    |> Enum.map(fn n -> {x_from + n, y_from} end)
   end
 
   defp gen_coords(x_from, y_from, x_to, y_to) do
