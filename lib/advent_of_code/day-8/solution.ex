@@ -52,7 +52,7 @@ defmodule AdventOfCode.DayEightSolution do
 
   defp solve_two([{signals, outputs} | rest], total) do
     d = decode_signals(signals)
-    x = outputs |> Enum.map(&sort_str/1) |> Enum.map(&d[&1]) |> Enum.join() |> String.to_integer()
+    x = outputs |> Enum.map(&d[&1]) |> Enum.join() |> String.to_integer()
     solve_two(rest, total + x)
   end
 
