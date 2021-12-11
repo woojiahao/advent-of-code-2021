@@ -5,7 +5,6 @@ end
 defmodule AdventOfCode.DayNineSolution do
   alias AdventOfCode.DayNineSolution.Location, as: Location
 
-  # Alt solution is to manually check coords
   defp load_data() do
     m =
       AdventOfCode.load_data(9, 'data.txt')
@@ -17,9 +16,6 @@ defmodule AdventOfCode.DayNineSolution do
 
     gen_graph(m, 1, 1, max_r, max_c, :digraph.new(), [])
   end
-
-  defp find_pt(pts, r, c),
-    do: pts |> Enum.find(fn %{coords: {row, col}} -> row == r and col == c end)
 
   defp gen_graph(_, r, _, max_r, _, g, pts) when r > max_r, do: {g, pts}
 
@@ -37,7 +33,7 @@ defmodule AdventOfCode.DayNineSolution do
 
     [up, down, left, right]
     |> Enum.filter(&(&1 != nil))
-    |> Enum.map(fn {row, col} ->
+    |> Enum.each(fn {row, col} ->
       pt = %Location{coords: {row, col}, height: m[row][col]}
       :digraph.add_vertex(g, pt)
       :digraph.add_edge(g, cur, pt)
@@ -57,6 +53,23 @@ defmodule AdventOfCode.DayNineSolution do
     |> Enum.sum()
   end
 
-  def part_two(),
-    do: load_data()
+  def part_two() do
+    {g, pts} = load_data()
+
+    pts
+    |> Enum.filter(fn %{height: h} -> h == 9 end)
+    |> Enum.each(&:digraph.del_vertex(g, &1))
+
+    pts
+    |> Enum.filter(fn pt ->
+      :digraph.out_neighbours(g, pt) |> Enum.all?(fn %{height: h} -> h > pt.height end)
+    end)
+    |> Enum.map(fn pt ->
+      :digraph_utils.reachable_neighbours([pt], g) |> Enum.count()
+    end)
+    |> Enum.sort()
+    |> Enum.reverse()
+    |> Enum.slice(0, 3)
+    |> Enum.reduce(1, fn c, acc -> acc * c end)
+  end
 end
