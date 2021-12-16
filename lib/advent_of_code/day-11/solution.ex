@@ -68,18 +68,28 @@ defmodule AdventOfCode.DayElevenSolution do
     propagate(ug, MapSet.new(), false)
   end
 
-  defp solve(_, total, 0), do: total
+  defp solve_one(_, total, 0), do: total
 
-  defp solve(g, total, n) do
-    IO.puts("Step #{n}")
+  defp solve_one(g, total, n) do
     {u_g, flashed} = step(g)
-    u_g |> IO.inspect()
-    MapSet.size(flashed) |> IO.inspect()
-    solve(u_g, total + MapSet.size(flashed), n - 1)
+    solve_one(u_g, total + MapSet.size(flashed), n - 1)
   end
 
   def part_one() do
     g = load_data()
-    solve(g, 0, 100)
+    solve_one(g, 0, 100)
+  end
+
+  defp solve_two(g, n) do
+    {u_g, _} = step(g)
+
+    if Map.values(u_g) |> Enum.all?(&(&1 == 0)),
+      do: n,
+      else: solve_two(u_g, n + 1)
+  end
+
+  def part_two() do
+    g = load_data()
+    solve_two(g, 1)
   end
 end
