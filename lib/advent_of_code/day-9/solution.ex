@@ -14,15 +14,15 @@ defmodule AdventOfCode.DayNineSolution do
 
     {max_r, max_c} = Matrex.size(m)
 
-    gen_graph(m, 1, 1, max_r, max_c, :digraph.new(), [])
+    gen_graph(m, 1, 1, max_r, max_c, :digraph.new())
   end
 
-  defp gen_graph(_, r, _, max_r, _, g, pts) when r > max_r, do: {g, pts}
+  defp gen_graph(_, r, _, max_r, _, g) when r > max_r, do: g
 
-  defp gen_graph(m, r, c, max_r, max_c, g, pts) when c > max_c,
-    do: gen_graph(m, r + 1, 1, max_r, max_c, g, pts)
+  defp gen_graph(m, r, c, max_r, max_c, g) when c > max_c,
+    do: gen_graph(m, r + 1, 1, max_r, max_c, g)
 
-  defp gen_graph(m, r, c, max_r, max_c, g, pts) do
+  defp gen_graph(m, r, c, max_r, max_c, g) do
     up = if r == 1, do: nil, else: {r - 1, c}
     down = if r == max_r, do: nil, else: {r + 1, c}
     left = if c == 1, do: nil, else: {r, c - 1}
@@ -39,13 +39,14 @@ defmodule AdventOfCode.DayNineSolution do
       :digraph.add_edge(g, cur, pt)
     end)
 
-    gen_graph(m, r, c + 1, max_r, max_c, g, [cur | pts])
+    gen_graph(m, r, c + 1, max_r, max_c, g)
   end
 
   def part_one() do
-    {g, pts} = load_data()
+    g = load_data()
 
-    pts
+    g
+    |> :digraph.vertices()
     |> Enum.filter(fn pt ->
       :digraph.out_neighbours(g, pt) |> Enum.all?(fn %{height: h} -> h > pt.height end)
     end)
@@ -54,13 +55,15 @@ defmodule AdventOfCode.DayNineSolution do
   end
 
   def part_two() do
-    {g, pts} = load_data()
+    g = load_data()
 
-    pts
+    g
+    |> :digraph.vertices()
     |> Enum.filter(fn %{height: h} -> h == 9 end)
     |> Enum.each(&:digraph.del_vertex(g, &1))
 
-    pts
+    g
+    |> :digraph.vertices()
     |> Enum.filter(fn pt ->
       :digraph.out_neighbours(g, pt) |> Enum.all?(fn %{height: h} -> h > pt.height end)
     end)
