@@ -35,14 +35,18 @@ defmodule AdventOfCode.DayTwelveSolution do
   defp walk_two_visits(_, :end, _, path), do: [path]
 
   defp walk_two_visits(g, cur, vs, path) do
-    # visited will be filled with all paths if there is a small cave with 2
-    visited = if Enum.any?(Map.values(vs), &(&1 == 2)), do: Map.values(vs), else: []
+    # visited will be filled with all visited small caves if there is a small cave with 2
+    visited = if Enum.any?(Map.values(vs), &(&1 == 2)), do: Map.keys(vs), else: []
     available = (:digraph.out_neighbours(g, cur) -- [:start]) -- visited
 
     available
     |> Enum.map(fn a ->
-      u_vs = if Atom.to_string(a) == String.downcase(Atom.to_string(a)), do: vs ++ [a], else: vs
-      walk(g, a, u_vs, path ++ [a])
+      u_vs =
+        if Atom.to_string(a) == String.downcase(Atom.to_string(a)),
+          do: Map.update(vs, a, 1, &(&1 + 1)),
+          else: vs
+
+      walk_two_visits(g, a, u_vs, path ++ [a])
     end)
     |> Enum.flat_map(& &1)
   end
