@@ -44,8 +44,6 @@ defmodule AdventOfCode.DayTenSolution do
   end
 
   def part_two() do
-    load_data() |> length() |> IO.inspect()
-
     costs =
       load_data()
       |> Enum.map(&check(&1, [], []))
@@ -59,10 +57,6 @@ defmodule AdventOfCode.DayTenSolution do
       end)
       |> Enum.sort()
 
-    costs |> IO.inspect()
-    length(costs) |> IO.inspect()
-
-    middle = Enum.at(costs, div(length(costs), 2))
-    middle
+    Enum.at(costs, div(length(costs), 2))
   end
 end
