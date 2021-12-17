@@ -1,59 +1,57 @@
 defmodule AdventOfCode.DayFifteenSolution do
-  @maze_size 9
+  @maze_size 100
 
   defp load_data() do
-    points =
-      AdventOfCode.load_data(15, "example.txt")
-      |> Enum.with_index()
-      |> Enum.flat_map(fn {l, r} ->
-        l
-        |> String.graphemes()
-        |> Enum.map(&String.to_integer/1)
-        |> Enum.with_index()
-        |> Enum.map(fn {i, c} -> {{r, c}, i} end)
-      end)
-
-    g = :digraph.new()
-
-    points
-    |> Enum.each(fn {coords, i} ->
-      :digraph.add_vertex(g, coords, i)
-    end)
-
-    points
-    |> Enum.each(fn {{r, c}, _} ->
-      [{r, c - 1}, {r, c + 1}, {r - 1, c}, {r + 1, c}]
-      |> Enum.filter(fn {ar, ac} ->
-        ar >= 0 and ac >= 0 and ar <= @maze_size and ac <= @maze_size
-      end)
-      |> Enum.each(fn {ar, ac} ->
-        :digraph.add_edge(g, {r, c}, {ar, ac})
-        :digraph.add_edge(g, {ar, ac}, {r, c})
-      end)
-    end)
-
-    g
+    AdventOfCode.load_data(15, "data.txt")
+    |> Enum.map(&String.graphemes/1)
+    |> Enum.map(fn l -> Enum.map(l, &String.to_integer/1) end)
+    |> Matrex.new()
   end
 
-  defp walk(_, {@maze_size, @maze_size}, _, path_cost), do: [path_cost - 1]
+  defp in_grid(row, col), do: row >= 1 and col >= 1 and row <= @maze_size and col <= @maze_size
 
-  defp walk(g, cur, unvisited, path_cost) do
-    cur |> IO.inspect()
-    u_unvisited = MapSet.delete(unvisited, cur)
-    neighbors = g |> :digraph.out_neighbours(cur) |> MapSet.new()
-    available = MapSet.intersection(neighbors, u_unvisited) |> IO.inspect()
+  defp dijkstra(m, costs, unvisited) do
+    if :queue.len(unvisited) == 0 do
+      costs[@maze_size][@maze_size] - 1.0
+    else
+      {{:value, {{row, col}, cost}}, u_unvisited} = :queue.out(unvisited)
 
-    available
-    |> Enum.map(fn a ->
-      {_, cost} = :digraph.vertex(g, cur)
-      walk(g, a, u_unvisited, path_cost + cost)
-    end)
-    |> Enum.flat_map(& &1)
+      neighbors =
+        [
+          {row - 1, col},
+          {row + 1, col},
+          {row, col - 1},
+          {row, col + 1}
+        ]
+        |> Enum.filter(fn {ar, ac} -> in_grid(ar, ac) end)
+        |> Enum.filter(fn {ar, ac} -> costs[ar][ac] > cost + m[ar][ac] end)
+
+      updated_costs =
+        Enum.reduce(neighbors, costs, fn {r, c}, acc ->
+          Matrex.set(acc, r, c, cost + m[r][c])
+        end)
+
+      updated_unvisited =
+        Enum.reduce(neighbors, u_unvisited, fn {r, c}, acc ->
+          :queue.in({{r, c}, updated_costs[r][c]}, acc)
+        end)
+        |> prioritize_queue()
+
+      dijkstra(m, updated_costs, updated_unvisited)
+    end
+  end
+
+  defp prioritize_queue(q) do
+    q
+    |> :queue.to_list()
+    |> Enum.sort_by(fn {_, c} -> c end)
+    |> Enum.reduce(:queue.new(), fn el, acc -> :queue.in(el, acc) end)
   end
 
   def part_one() do
-    # load_data() |> :digraph.out_neighbours({4, 1})
-    all = for r <- 0..@maze_size, c <- 0..@maze_size, do: {r, c}
-    load_data() |> walk({0, 0}, MapSet.new(all), 0)
+    m = load_data()
+    costs = Matrex.new(@maze_size, @maze_size, fn -> 9_9999 end) |> Matrex.set(1, 1, m[1][1])
+    unvisited = :queue.new() |> then(fn q -> :queue.in({{1, 1}, m[1][1]}, q) end)
+    dijkstra(m, costs, unvisited)
   end
 end
