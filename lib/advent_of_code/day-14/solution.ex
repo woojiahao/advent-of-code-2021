@@ -8,30 +8,34 @@ defmodule AdventOfCode.DayFourteenSolution do
       raw_rules
       |> String.split("\n", trim: true)
       |> Enum.map(&String.split(&1, " -> ", trim: true))
-      |> Map.new(fn [pair, insertion] -> {pair, insertion} end)
+      |> Map.new(fn [pair, insertion] -> {String.graphemes(pair), insertion} end)
 
     {template, rules}
   end
 
   defp polymerize(polymer, rules) do
-    pairs = polymer |> String.graphemes() |> Enum.chunk_every(2, 1)
+    polymer
+    |> Enum.reduce(polymer, fn {[f, b] = pair, count}, acc ->
+      rule = rules[pair]
 
-    Enum.reduce(pairs, "", fn
-      [last], acc ->
-        acc <> last
-
-      pair, acc ->
-        rule = rules[Enum.join(pair)]
-        new = Enum.at(pair, 0) <> rule
-        acc <> new
+      acc
+      |> Map.update([f, rule], count, &(&1 + count))
+      |> Map.update([rule, b], count, &(&1 + count))
+      |> Map.update([f, b], 0, fn x -> max(0, x - count) end)
     end)
   end
 
-  defp solve(template, rules, cycles) do
+  defp solve(template, rules, n) do
+    [last_el | _] = template |> String.graphemes() |> Enum.reverse()
+
+    polymer =
+      template |> String.graphemes() |> Enum.chunk_every(2, 1, :discard) |> Enum.frequencies()
+
     {{_, a}, {_, b}} =
-      Enum.reduce(0..(cycles - 1), template, fn _, polymer -> polymerize(polymer, rules) end)
-      |> String.graphemes()
-      |> Enum.frequencies()
+      Enum.reduce(0..(n - 1), polymer, fn _, polymer -> polymerize(polymer, rules) end)
+      |> Enum.map(fn {[f, _], c} -> {f, c} end)
+      |> Enum.reduce(%{}, fn {l, c}, acc -> acc |> Map.update(l, c, &(&1 + c)) end)
+      |> Map.update(last_el, -1, &(&1 + 1))
       |> Enum.min_max_by(fn {_, v} -> v end)
 
     abs(a - b)
