@@ -27,15 +27,23 @@ defmodule AdventOfCode.DayFourteenSolution do
     end)
   end
 
-  def part_one() do
-    {template, rules} = load_data()
-
+  defp solve(template, rules, cycles) do
     {{_, a}, {_, b}} =
-      Enum.reduce(0..9, template, fn _, polymer -> polymerize(polymer, rules) end)
+      Enum.reduce(0..(cycles - 1), template, fn _, polymer -> polymerize(polymer, rules) end)
       |> String.graphemes()
       |> Enum.frequencies()
       |> Enum.min_max_by(fn {_, v} -> v end)
 
     abs(a - b)
+  end
+
+  def part_one() do
+    {template, rules} = load_data()
+    solve(template, rules, 10)
+  end
+
+  def part_two() do
+    {template, rules} = load_data()
+    solve(template, rules, 40)
   end
 end
