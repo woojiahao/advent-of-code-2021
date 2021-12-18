@@ -13,16 +13,6 @@ defmodule AdventOfCode.DaySeventeenSolution do
     target_area
   end
 
-  defp x_possible?(_, dist, _, x_end) when dist > x_end, do: false
-  defp x_possible?(_, dist, x_start, _) when dist >= x_start, do: true
-  defp x_possible?(move, _, _, _) when move == 0, do: nil
-
-  defp x_possible?(move, dist, x_start, x_end),
-    do: x_possible?(max(move - 1, 0), dist + move, x_start, x_end)
-
-  defp step(x, y, x_start, x_end, y_start, y_end),
-    do: step(x, y, x, y, x_start, x_end, y_start, y_end)
-
   defp step(_, _, x_pos, y_pos, x_start, x_end, y_start, y_end)
        when x_pos in x_start..x_end and y_pos in y_start..y_end,
        do: {:hit, {x_pos, y_pos}}
@@ -40,11 +30,10 @@ defmodule AdventOfCode.DaySeventeenSolution do
   end
 
   defp find_valid_velocities([x_start, x_end, y_start, y_end], allow_negative? \\ false) do
-    possible_x = 0..x_end |> Enum.filter(&x_possible?(&1, 0, x_start, x_end))
     possible_y = if allow_negative?, do: y_start..abs(y_start), else: 0..abs(y_start)
 
-    for x <- possible_x, y <- possible_y do
-      {{x, y}, step(x, y, x_start, x_end, y_start, y_end)}
+    for x <- 0..x_end, y <- possible_y do
+      {{x, y}, step(x, y, x, y, x_start, x_end, y_start, y_end)}
     end
     |> Enum.filter(fn {_, {status, _}} -> status == :hit end)
     |> Enum.map(fn {coords, _} -> coords end)
