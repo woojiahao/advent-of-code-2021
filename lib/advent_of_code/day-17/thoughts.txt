@@ -1,0 +1,62 @@
+Given a target x_start and x_end, the available starting x velocity is limited to the x_end
+Given a target y_start and y_end, the available starting y velocity is limited to the y_end
+Therefore, the valid velocities range from (0, 0) to (x_end, y_end)
+
+To determine if a velocity is within range, check if its triangle sum (interrupted) is within the x_start and x_end. We
+can first keep track of the x distance travelled and check if it will ever fall within the x_start. Once we find where
+the interrupted triangle sum can fit within the target, focus on the y distance. While the x distance travelled is not
+within x_start..x_end, add to the triangle sum. If the value falls outside of the range, stop searching this velocity,
+else keep going till you are within the range
+
+find(17, 20, 30)
+x_dist = 0
+move = 17
+x_dist += move = 17
+move = 16
+x_dist += move = 33
+move = 15
+
+
+find(x, x_start, x_end) do
+  x_dist = 0
+  move = x
+  while (x_dist < x_start) do
+    if (move == 0) break
+    x_dist += move
+    move -= 1
+  end
+end
+
+
+...............x..x............
+...........x........x..........
+...............................
+......x..............x.........
+...............................
+...............................
+...............#..#..x.........
+...........#...p....#..........
+...............................
+......#.p............#.........
+.....................x.........
+......y....y.................
+S..............y.....#.........
+...............................
+..................y............
+.....................x........
+.....................#.........
+....................TTTTTTTTTTT
+....................TTTTTTTTTTT
+....................TTTTTTTTTTT
+....................TTTTTTTTTTT
+....................T#TTTTTTTTT
+....................TTTTTTTTTTT
+
+(6, 3)
+(11, 5)
+(13, )
+
+Starting with y = 0, let's go through and test how large y can get before it falls outside of y (y > y_end),
+to simulate this behavior, start with a fixed x, and y 
+
+To find the maximal y, use the y_end as the approximation
