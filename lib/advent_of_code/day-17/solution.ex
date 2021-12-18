@@ -27,20 +27,11 @@ defmodule AdventOfCode.DaySeventeenSolution do
        when x_pos in x_start..x_end and y_pos in y_start..y_end,
        do: {:hit, {x_pos, y_pos}}
 
-  defp step(_, _, x_pos, y_pos, x_start, _, y_start, y_end)
-       when y_pos in y_start..y_end and x_pos < x_start,
-       do: {:miss, :before_target}
-
-  defp step(_, _, x_pos, y_pos, x_start, x_end, y_start, _)
-       when x_pos in x_start..x_end and y_pos < y_start,
-       do: {:miss, :below_target}
-
   defp step(_, _, x_pos, y_pos, _, x_end, y_start, _)
-       when x_pos > x_end and y_pos < y_start,
+       when x_pos > x_end or y_pos < y_start,
        do: {:miss, :past_target}
 
   defp step(x_step, y_step, x_pos, y_pos, x_start, x_end, y_start, y_end) do
-    # TODO: Merge x_possible? to step
     new_x_step = max(0, x_step - 1)
     new_y_step = y_step - 1
     new_x = x_pos + new_x_step
@@ -48,10 +39,11 @@ defmodule AdventOfCode.DaySeventeenSolution do
     step(new_x_step, new_y_step, new_x, new_y, x_start, x_end, y_start, y_end)
   end
 
-  defp find_valid_velocities([x_start, x_end, y_start, y_end]) do
+  defp find_valid_velocities([x_start, x_end, y_start, y_end], allow_negative? \\ false) do
     possible_x = 0..x_end |> Enum.filter(&x_possible?(&1, 0, x_start, x_end))
+    possible_y = if allow_negative?, do: y_start..abs(y_start), else: 0..abs(y_start)
 
-    for x <- possible_x, y <- 0..abs(y_start) do
+    for x <- possible_x, y <- possible_y do
       {{x, y}, step(x, y, x_start, x_end, y_start, y_end)}
     end
     |> Enum.filter(fn {_, {status, _}} -> status == :hit end)
@@ -63,5 +55,11 @@ defmodule AdventOfCode.DaySeventeenSolution do
     |> find_valid_velocities()
     |> Enum.map(&Enum.sum(0..elem(&1, 1)))
     |> Enum.max()
+  end
+
+  def part_two() do
+    load_data()
+    |> find_valid_velocities(true)
+    |> length()
   end
 end
