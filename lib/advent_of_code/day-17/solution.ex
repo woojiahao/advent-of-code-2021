@@ -29,10 +29,8 @@ defmodule AdventOfCode.DaySeventeenSolution do
     step(new_x_step, new_y_step, new_x, new_y, x_start, x_end, y_start, y_end)
   end
 
-  defp find_valid_velocities([x_start, x_end, y_start, y_end], allow_negative? \\ false) do
-    possible_y = if allow_negative?, do: y_start..abs(y_start), else: 0..abs(y_start)
-
-    for x <- 0..x_end, y <- possible_y do
+  defp find_valid_velocities([x_start, x_end, y_start, y_end]) do
+    for x <- 0..x_end, y <- y_start..abs(y_start) do
       {{x, y}, step(x, y, x, y, x_start, x_end, y_start, y_end)}
     end
     |> Enum.filter(fn {_, {status, _}} -> status == :hit end)
@@ -48,7 +46,7 @@ defmodule AdventOfCode.DaySeventeenSolution do
 
   def part_two() do
     load_data()
-    |> find_valid_velocities(true)
+    |> find_valid_velocities()
     |> length()
   end
 end
